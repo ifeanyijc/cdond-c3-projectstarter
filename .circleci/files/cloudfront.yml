@@ -1,14 +1,11 @@
-Description: >
-  Cloudfront distribution for UdaPeople.
+Description: Ubah/ Cloudfront distribution for UdaPeople.
 
 Parameters:
   WorkflowID:
     Description: Unique identifier.
     Type: String
 
-
 Resources:
-  
   CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
     Properties:
@@ -24,13 +21,13 @@ Resources:
             Id: webpage
             S3OriginConfig:
               OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
-        Enabled: True
-        DefaultRootObject: index.html
-        DefaultCacheBehavior:
-          ForwardedValues:
-            QueryString: False
-          TargetOriginId: webpage
-          ViewerProtocolPolicy: allow-all
+        # Enabled: True
+        # DefaultRootObject: index.html
+        # DefaultCacheBehavior:
+        #   ForwardedValues:
+        #     QueryString: False
+        #   TargetOriginId: webpage
+        #   ViewerProtocolPolicy: allow-all
 
 Outputs:
   WorkflowID:

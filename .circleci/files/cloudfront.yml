@@ -21,13 +21,13 @@ Resources:
             Id: webpage
             S3OriginConfig:
               OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
-        # Enabled: True
-        # DefaultRootObject: index.html
-        # DefaultCacheBehavior:
-        #   ForwardedValues:
-        #     QueryString: False
-        #   TargetOriginId: webpage
-        #   ViewerProtocolPolicy: allow-all
+        Enabled: True
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          ForwardedValues:
+            QueryString: False
+          TargetOriginId: webpage
+          ViewerProtocolPolicy: allow-all
 
 Outputs:
   WorkflowID:

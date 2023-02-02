@@ -439,7 +439,7 @@ jobs:
   cleanup:
     docker:
       - image: amazon/aws-cli
-    steps:
+    steps: #
       - checkout
       - run:
           name: Get old stack workflow id and remove old stacks and bucket contents

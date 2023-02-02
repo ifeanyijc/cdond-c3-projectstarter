@@ -7,15 +7,13 @@ commands:
     description: Revert the last migration, if any were executed during the current workflow
     parameters:
       Workflow_ID:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
+        default: 08b5bcd
     steps:
       - run:
           name: Revert migrations
           when: on_fail
           command: |
             SUCCESS=$(curl --insecure  https://kvdb.io/UyWZQ8MhEBtZdDTj9FA1Sa/migration_<< parameters.Workflow_ID >>)
-
             # Logic for reverting the database state
             if (( $SUCCESS == 1 ));
             then
@@ -513,19 +511,19 @@ workflows:
       #     #   branches:
       #     #     only: [Cloud-DevOps]
 
-      - deploy-infrastructure
-        # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations, deploy-frontend]
-      - cloudfront-update:
-          requires: [deploy-backend]
-      - cleanup:
-          requires: [cloudfront-update]
-      - smoke-test:
-          requires: [cleanup]
+      # - deploy-infrastructure
+      # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [run-migrations, deploy-frontend]
+      # - cloudfront-update:
+      #     requires: [deploy-backend]
+      # - cleanup:
+      #     requires: [cloudfront-update]
+      - smoke-test
+        # requires: [cleanup]

@@ -234,7 +234,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
 
-      - destroy-environment
+      # - destroy-environment
 
   configure-infrastructure:
     docker:
@@ -255,8 +255,8 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
 
-      - remove-bucket-contents
-      - destroy-environment
+      # - remove-bucket-contents
+      # - destroy-environment
 
   run-migrations:
     docker:
@@ -281,9 +281,9 @@ jobs:
                 curl -k https://kvdb.io/UyWZQ8MhEBtZdDTj9FA1Sa/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
   deploy-frontend:
     docker:
@@ -327,9 +327,9 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
   deploy-backend:
     docker:
@@ -362,9 +362,9 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
   smoke-test:
     docker:
@@ -399,9 +399,9 @@ jobs:
               exit 1
             fi
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
   cloudfront-update:
     docker:
@@ -432,9 +432,9 @@ jobs:
             --stack-name udapeople-cloudfront \
             --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
   cleanup:
     docker:
@@ -472,60 +472,84 @@ jobs:
               fi
             done
 
-      - revert-migrations
-      - remove-bucket-contents
-      - destroy-environment
+      # - revert-migrations
+      # - remove-bucket-contents
+      # - destroy-environment
 
 workflows:
   udapeople_app_workflow:
     jobs:
-      # - build-frontend
-      #   # filters:
-      #   #   branches:
-      #   #     only: [Cloud-DevOps]
+      - build-frontend:
+        filters:
+          branches:
+            only: [cloud-branch]
 
-      # - build-backend
-      #   # filters:
-      #   #   branches:
-      #   #     only: [Cloud-DevOps]
+      - build-backend:
+        filters:
+          branches:
+            only: [cloud-branch]
 
-      # - test-frontend:
-      #     requires: [build-frontend]
-      #     # filters:
-      #     #   branches:
-      #     #     only: [Cloud-DevOps]
+      - test-frontend:
+          requires: [build-frontend]
+          filters:
+            branches:
+              only: [cloud-branch]
 
-      # - test-backend:
-      #     requires: [build-backend]
-      #     # filters:
-      #     #   branches:
-      #     #     only: [Cloud-DevOps]
+      - test-backend:
+          requires: [build-backend]
+          filters:
+            branches:
+              only: [cloud-branch]
 
-      # - scan-backend:
-      #     requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+          filters:
+            branches:
+              only: [cloud-branch]
+
+      - scan-frontend:
+          requires: [build-frontend]
+          filters:
+            branches:
+              only: [cloud-branch]
+
+      # - deploy-infrastructure:
+      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
       #       branches:
-      #         only: [Cloud-DevOps]
-
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      #     # filters:
-      #     #   branches:
-      #     #     only: [Cloud-DevOps]
-
-      - deploy-infrastructure
-        # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations, deploy-frontend]
-      - cloudfront-update:
-          requires: [deploy-backend]
-      - cleanup:
-          requires: [cloudfront-update]
-      - smoke-test:
-          requires: [cleanup]
+      #         only: [master]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - deploy-backend:
+      #     requires: [run-migrations, deploy-frontend]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - cloudfront-update:
+      #     requires: [deploy-backend]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - cleanup:
+      #     requires: [cloudfront-update]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - smoke-test:
+      #     requires: [cleanup]
+      #     filters:
+      #       branches:
+      #         only: [master]

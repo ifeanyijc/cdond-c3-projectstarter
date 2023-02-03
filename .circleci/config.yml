@@ -2,6 +2,7 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@3.1.4
 
+commands:
   revert-migrations:
     description: Revert the last migration, if any were executed during the current workflow
     parameters:
@@ -395,7 +396,7 @@ jobs:
               # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
               exit 1
             else
-              exit 1
+              exit 2
             fi
 
       - revert-migrations

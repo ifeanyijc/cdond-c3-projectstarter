@@ -2,19 +2,19 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@3.1.4
 
-commands:
   revert-migrations:
     description: Revert the last migration, if any were executed during the current workflow
     parameters:
       Workflow_ID:
         type: string
-        default: 08b5bcd
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Revert migrations
           when: on_fail
           command: |
             SUCCESS=$(curl --insecure  https://kvdb.io/UyWZQ8MhEBtZdDTj9FA1Sa/migration_<< parameters.Workflow_ID >>)
+
             # Logic for reverting the database state
             if (( $SUCCESS == 1 ));
             then
@@ -22,7 +22,6 @@ commands:
               npm install
               npm run migrations:revert
             fi
-
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -318,7 +317,7 @@ jobs:
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
       - run:
-          name: Deploy frontend objects #
+          name: Deploy frontend objects
           command: |
             # your code here
             cd frontend
@@ -394,9 +393,9 @@ jobs:
             if curl -s $FRONTEND_WEBSITE -v | grep "Welcome"
             then
               # This is the intentional error, if "Welcome" is indeed in the response this step will exit with exit code 1
-              exit 1
+              exit 0
             else
-              exit 2
+              exit 1
             fi
 
       - revert-migrations
@@ -439,7 +438,7 @@ jobs:
   cleanup:
     docker:
       - image: amazon/aws-cli
-    steps: #
+    steps:
       - checkout
       - run:
           name: Get old stack workflow id and remove old stacks and bucket contents
@@ -513,19 +512,19 @@ workflows:
       #     #   branches:
       #     #     only: [Cloud-DevOps]
 
-      # - deploy-infrastructure
-      # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [deploy-backend]
-      # - cleanup:
-      #     requires: [cloudfront-update]
-      - smoke-test
-        # requires: [cleanup]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations, deploy-frontend]
+      - cloudfront-update:
+          requires: [deploy-backend]
+      - cleanup:
+          requires: [cloudfront-update]
+      - smoke-test:
+          requires: [cleanup]

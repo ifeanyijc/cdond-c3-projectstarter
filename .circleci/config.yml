@@ -532,19 +532,19 @@ workflows:
       #     #     only: [master]
       - deploy-backend:
           requires: [run-migrations, deploy-frontend]
+          # filters:
+          #   branches:
+          #     only: [master]
+      - cloudfront-update:
+          requires: [deploy-backend]
       #     # filters:
       #     #   branches:
       #     #     only: [master]
-      # - cloudfront-update:
-      #     requires: [deploy-backend]
-      # #     # filters:
-      # #     #   branches:
-      # #     #     only: [master]
-      # - cleanup:
-      #     requires: [cloudfront-update]
-      # #     # filters:
-      # #     #   branches:
-      # #     #     only: [master]
+      - cleanup:
+          requires: [cloudfront-update]
+      #     # filters:
+      #     #   branches:
+      #     #     only: [master]
       # - smoke-test:
       #     requires: [cleanup]
       # #     # filters:
